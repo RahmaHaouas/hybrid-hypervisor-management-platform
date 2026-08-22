@@ -10,13 +10,14 @@ Ce projet construit une API REST unique qui abstrait ces différences et expose 
 
 ## Architecture
 
-            API REST (FastAPI)
- /hypervisors   /vms   /vms/{id}/start
-
-    ESXi        Hyper-V       KVM        OpenStack
-  pyvmomi        pywinrm    paramiko    openstacksdk
-
-
+```mermaid
+flowchart TD
+    API["API REST FastAPI<br/>/hypervisors · /vms · /vms/{id}/start"]
+    API --> ESXi["ESXi<br/>pyvmomi"]
+    API --> HyperV["Hyper-V<br/>pywinrm"]
+    API --> KVM["KVM<br/>paramiko + virsh"]
+    API --> OpenStack["OpenStack<br/>openstacksdk"]
+```
 
 Chaque hyperviseur est piloté par un connecteur dédié qui implémente une interface commune (`HypervisorConnector`), permettant à l'API de traiter tous les hyperviseurs de façon polymorphe, sans jamais savoir, dans le code des routes, à quel hyperviseur elle parle réellement.
 
