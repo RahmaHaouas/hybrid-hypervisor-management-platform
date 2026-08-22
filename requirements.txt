@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pyvmomi
+pywinrm
+python-dotenv
+paramiko
+openstacksdk
