@@ -14,17 +14,17 @@ client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 client.connect(hostname=host, username=user, password=password)
 
-print("✅ Connexion SSH réussie !")
+print("Connexion SSH réussie !")
 
 stdin, stdout, stderr = client.exec_command("virsh --connect qemu:///system list --all")
 output = stdout.read().decode()
 error = stderr.read().decode()
 
-print("\n--- Résultat de 'virsh list --all' ---")
+print("\n Résultat de 'virsh list --all' ")
 print(output)
 
 if error:
-    print("--- Erreurs ---")
+    print(" Erreurs ")
     print(error)
 
 client.close()
