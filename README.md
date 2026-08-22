@@ -8,6 +8,16 @@ Une infrastructure d'entreprise mélange rarement un seul hyperviseur. Entre hé
 
 Ce projet construit une API REST unique qui abstrait ces différences et expose une interface commune pour lister, démarrer et arrêter des VMs, quel que soit l'hyperviseur sous-jacent.
 
+## Phases du projet
+
+| Phase | Contenu | Statut |
+|---|---|---|
+| 1 | Étude de l'architecture cible | ✅ |
+| 2 | Déploiement des hyperviseurs (ESXi, Hyper-V, KVM) en virtualisation imbriquée | ✅ |
+| 3 | Configuration réseau et DNS (`lab.local`) | ✅ |
+| 4 | Stockage partagé NFS (datastore ESXi, lecteur réseau Hyper-V) | ✅ |
+| 5 | Backend FastAPI unifiant les 3 hyperviseurs + connecteur OpenStack (DevStack) | ✅ |
+| 6 | Authentification API, création de VM depuis l'API, tests automatisés | 🔜 |
 ## Architecture
 
 ```mermaid
