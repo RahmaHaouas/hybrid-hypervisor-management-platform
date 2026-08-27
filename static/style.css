@@ -259,3 +259,128 @@ section h2 {
     font-size: 11px;
     margin-top: 8px;
 }
+
+/* Barre d'administration */
+#admin-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 32px;
+    margin-top: 16px;
+}
+
+#refresh-button,
+#activity-log-button {
+    background: #16212e;
+    color: #f5f5f0;
+    border: 0.5px solid #2a3644;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#refresh-button:hover,
+#activity-log-button:hover {
+    border-color: #e8792c;
+}
+
+#last-check-label {
+    color: #6b7684;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+/* Stats agrégées */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat-box {
+    background: #16212e;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    color: #f5f5f0;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.stat-label {
+    color: #8a94a3;
+    font-size: 11px;
+}
+
+/* Modale journal d'activité */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #16212e;
+    border-radius: 10px;
+    padding: 20px;
+    width: 500px;
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 0.5px solid #2a3644;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.modal-header h2 {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+#close-activity-modal {
+    background: none;
+    border: none;
+    color: #8a94a3;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.activity-entry {
+    padding: 10px 0;
+    border-bottom: 0.5px solid #2a3644;
+    font-size: 13px;
+}
+
+.activity-entry:last-child {
+    border-bottom: none;
+}
+
+.activity-entry .activity-main {
+    color: #f5f5f0;
+}
+
+.activity-entry .activity-meta {
+    color: #6b7684;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.activity-entry.failed .activity-main {
+    color: #e24b4a;
+}

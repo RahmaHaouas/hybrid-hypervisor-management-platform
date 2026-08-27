@@ -9,6 +9,12 @@ const loginError = document.getElementById("login-error");
 const logoutButton = document.getElementById("logout-button");
 const hypervisorsGrid = document.getElementById("hypervisors-grid");
 const vmsList = document.getElementById("vms-list");
+const refreshButton = document.getElementById("refresh-button");
+const activityLogButton = document.getElementById("activity-log-button");
+const lastCheckLabel = document.getElementById("last-check-label");
+const activityModal = document.getElementById("activity-modal");
+const closeActivityModal = document.getElementById("close-activity-modal");
+const activityList = document.getElementById("activity-list");
 
 loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -62,9 +68,7 @@ async function apiFetch(path, options = {}) {
     return response.json();
 }
 
-async function loadHypervisors() {
-    const hypervisors = await apiFetch("/hypervisors");
-
+async function renderHypervisors(hypervisors) {
     hypervisorsGrid.innerHTML = "";
 
     for (const hv of hypervisors) {
@@ -81,9 +85,7 @@ async function loadHypervisors() {
     }
 }
 
-async function loadVMs() {
-    const vms = await apiFetch("/vms");
-
+async function renderVMs(vms) {
     vmsList.innerHTML = "";
 
     for (const vm of vms) {
@@ -113,6 +115,13 @@ async function loadVMs() {
     document.querySelectorAll(".action-button").forEach((button) => {
         button.addEventListener("click", handleVmAction);
     });
+}
+
+function updateStats(hypervisors, vms) {
+    document.getElementById("stat-total-vms").textContent = vms.length;
+    document.getElementById("stat-running-vms").textContent = vms.filter((v) => v.state === "running").length;
+    const onlineCount = hypervisors.filter((h) => h.reachable).length;
+    document.getElementById("stat-hypervisors-online").textContent = `${onlineCount}/${hypervisors.length}`;
 }
 
 async function handleVmAction(event) {
@@ -188,9 +197,16 @@ async function loadUptime() {
 
 
 async function loadDashboard() {
-    await loadHypervisors();
-    await loadVMs();
-     await loadUptime();
+    const hypervisors = await apiFetch("/hypervisors");
+    renderHypervisors(hypervisors);
+
+    const vms = await apiFetch("/vms");
+    renderVMs(vms);
+
+    updateStats(hypervisors, vms);
+    await loadUptime();
+
+    lastCheckLabel.textContent = `Dernière vérification : ${new Date().toLocaleTimeString()}`;
 }
 
 function logout() {
@@ -202,6 +218,39 @@ function logout() {
 }
 
 logoutButton.addEventListener("click", logout);
+
+refreshButton.addEventListener("click", () => {
+    if (authToken) {
+        loadDashboard();
+    }
+});
+
+activityLogButton.addEventListener("click", async () => {
+    const entries = await apiFetch("/activity-log");
+
+    activityList.innerHTML = "";
+
+    if (entries.length === 0) {
+        activityList.innerHTML = `<p class="activity-entry">Aucune action enregistrée pour l'instant.</p>`;
+    } else {
+        for (const entry of entries) {
+            const div = document.createElement("div");
+            div.className = `activity-entry ${entry.success ? "" : "failed"}`;
+            const time = new Date(entry.performed_at).toLocaleString();
+            div.innerHTML = `
+                <div class="activity-main">${entry.username} a ${entry.action === "start" ? "démarré" : "arrêté"} ${entry.vm_id} (${entry.hypervisor}) ${entry.success ? "" : "&mdash; échec"}</div>
+                <div class="activity-meta">${time}</div>
+            `;
+            activityList.appendChild(div);
+        }
+    }
+
+    activityModal.classList.remove("hidden");
+});
+
+closeActivityModal.addEventListener("click", () => {
+    activityModal.classList.add("hidden");
+});
 
 setInterval(() => {
     if (authToken) {

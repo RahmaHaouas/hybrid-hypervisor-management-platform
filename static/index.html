@@ -27,7 +27,30 @@
             <button id="logout-button">Déconnexion</button>
         </header>
 
+        <div id="admin-bar">
+            <button id="refresh-button">Actualiser tout</button>
+            <button id="activity-log-button">Journal d'activité</button>
+            <span id="last-check-label"></span>
+        </div>
+
         <main>
+            <section id="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p class="stat-value" id="stat-total-vms">-</p>
+                        <p class="stat-label">VMs totales</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="stat-value" id="stat-running-vms">-</p>
+                        <p class="stat-label">Actives</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="stat-value" id="stat-hypervisors-online">-</p>
+                        <p class="stat-label">Hyperviseurs en ligne</p>
+                    </div>
+                </div>
+            </section>
+
             <section id="hypervisors-section">
                 <h2>Hyperviseurs</h2>
                 <div id="hypervisors-grid" class="cards-grid">
@@ -46,6 +69,16 @@
             </section>
         </main>
     </div>
+
+    <div id="activity-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Journal d'activité</h2>
+            <button id="close-activity-modal">&times;</button>
+        </div>
+        <div id="activity-list"></div>
+    </div>
+</div>
 
     <script src="/static/app.js"></script>
 </body>
