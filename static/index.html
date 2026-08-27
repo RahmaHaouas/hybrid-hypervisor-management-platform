@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Hypervisor Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div id="login-screen" class="screen">
+        <div class="login-card">
+            <h1>Hybrid Hypervisor Platform</h1>
+            <p class="subtitle">Connexion requise</p>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+                <input type="password" id="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="screen hidden">
+        <header>
+            <h1>Hybrid Hypervisor Platform</h1>
+            <button id="logout-button">Déconnexion</button>
+        </header>
+
+        <main>
+            <section id="hypervisors-section">
+                <h2>Hyperviseurs</h2>
+                <div id="hypervisors-grid" class="cards-grid">
+                </div>
+            </section>
+
+            <section id="uptime-section">
+                <h2>Disponibilité (historique)</h2>
+                <div id="uptime-chart"></div>
+            </section>
+
+            <section id="vms-section">
+                <h2>Machines virtuelles</h2>
+                <div id="vms-list">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
