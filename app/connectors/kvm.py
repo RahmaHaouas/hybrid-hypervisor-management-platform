@@ -66,6 +66,26 @@ class KVMConnector(HypervisorConnector):
     def stop_vm(self, vm_id: str) -> bool:
         try:
             self._run_ssh(f"shutdown {vm_id}")
+        except RuntimeError:
+            pass
+
+        time.sleep(5)
+
+        state = self._get_vm_state(vm_id)
+        if state == VMState.STOPPED:
+            return True
+
+        try:
+            self._run_ssh(f"destroy {vm_id}")
             return True
         except RuntimeError:
             return False
+
+
+    def _get_vm_state(self, vm_id: str) -> VMState:
+        raw = self._run_ssh("list --all")
+        for line in raw.strip().splitlines()[2:]:
+            parts = line.split(None, 2)
+            if len(parts) >= 3 and parts[1] == vm_id:
+                return _STATE_MAP.get(parts[2].strip(), VMState.UNKNOWN)
+        return VMState.UNKNOWN

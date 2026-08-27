@@ -23,3 +23,17 @@ class ActionResult(BaseModel):
     hypervisor: str
     vm_id: str
     action: str
+    
+class UptimePoint(BaseModel):
+    hypervisor: str
+    reachable: bool
+    checked_at: str
+
+
+class ActivityEntry(BaseModel):
+    username: str
+    hypervisor: str
+    vm_id: str
+    action: str
+    success: bool
+    performed_at: str

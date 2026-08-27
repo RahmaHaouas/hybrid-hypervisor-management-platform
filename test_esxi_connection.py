@@ -16,7 +16,7 @@ context.verify_mode = ssl.CERT_NONE
 
 print(f"Connexion à {host}...")
 si = SmartConnect(host=host, user=user, pwd=password, sslContext=context)
-print("✅ Connexion réussie !")
+print("Connexion réussie !")
 
 content = si.RetrieveContent()
 print(f"Nom de l'hôte ESXi : {content.about.fullName}")
@@ -25,9 +25,9 @@ print(f"Nom de l'hôte ESXi : {content.about.fullName}")
 container = content.viewManager.CreateContainerView(content.rootFolder, [vim.VirtualMachine], True)
 vms = container.view
 
-print(f"\nNombre de VMs trouvées : {len(vms)}")
+print(f"\n Nombre de VMs trouvées : {len(vms)}")
 for vm in vms:
     print(f" - {vm.name} | État : {vm.runtime.powerState}")
 
 Disconnect(si)
-print("\nDéconnecté.")
+print("\n Déconnecté.")
