@@ -83,8 +83,12 @@ class ESXiConnector(HypervisorConnector):
                 return False
             vm.PowerOnVM_Task()
             return True
+        except vim.fault.RestrictedVersion:
+                return False
         finally:
             Disconnect(si)
+            
+    
 
     def stop_vm(self, vm_id: str) -> bool:
         si = self._connect()
@@ -94,5 +98,7 @@ class ESXiConnector(HypervisorConnector):
                 return False
             vm.PowerOffVM_Task()
             return True
+        except vim.fault.RestrictedVersion:
+                return False
         finally:
             Disconnect(si)

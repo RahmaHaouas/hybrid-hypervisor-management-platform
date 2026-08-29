@@ -1,3 +1,5 @@
+import time
+
 import paramiko
 
 from app.connectors.base import HypervisorConnector, VMInfo, VMState
