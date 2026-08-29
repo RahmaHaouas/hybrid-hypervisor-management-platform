@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hybrid Hypervisor Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 </head>
 <body>
 
@@ -22,53 +23,69 @@
     </div>
 
     <div id="dashboard-screen" class="screen hidden">
-        <header>
-            <h1>Hybrid Hypervisor Platform</h1>
-            <button id="logout-button">Déconnexion</button>
-        </header>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">Hybrid Hypervisor</div>
+            <button id="refresh-button" class="sidebar-item">
+                <i class="ti ti-refresh"></i> Actualiser
+            </button>
+            <button id="activity-log-button" class="sidebar-item">
+                <i class="ti ti-list-details"></i> Journal
+            </button>
+            <div class="sidebar-spacer"></div>
+            <span id="last-check-label" class="sidebar-meta"></span>
+            <button id="logout-button" class="sidebar-item">
+                <i class="ti ti-logout"></i> Déconnexion
+            </button>
+        </aside>
 
-        <div id="admin-bar">
-            <button id="refresh-button">Actualiser tout</button>
-            <button id="activity-log-button">Journal d'activité</button>
-            <span id="last-check-label"></span>
+        <div class="main-area">
+            <header class="main-header">
+                <span class="header-spacer"></span>
+                <h1>Hybrid Hypervisor Platform</h1>
+                <button id="theme-toggle" class="theme-toggle-button">
+                    <i class="ti ti-moon" id="theme-icon"></i>
+                </button>
+            </header>
+
+            <main>
+                <section id="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <p class="stat-value" id="stat-total-vms">-</p>
+                            <p class="stat-label">VMs totales</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="stat-value" id="stat-running-vms">-</p>
+                            <p class="stat-label">Actives</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="stat-value" id="stat-hypervisors-online">-</p>
+                            <p class="stat-label">Hyperviseurs en ligne</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="hypervisors-section">
+                    <h2>Hyperviseurs</h2>
+                    <div id="hypervisors-grid" class="cards-grid">
+                    </div>
+                </section>
+
+                <section id="uptime-section">
+                    <h2>Disponibilité (historique)</h2>
+                    <div id="uptime-chart"></div>
+                </section>
+
+                <section id="vms-section">
+                    <h2>Machines virtuelles</h2>
+                    <div id="vms-list">
+                    </div>
+                </section>
+            </main>
         </div>
-
-        <main>
-            <section id="stats-section">
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <p class="stat-value" id="stat-total-vms">-</p>
-                        <p class="stat-label">VMs totales</p>
-                    </div>
-                    <div class="stat-box">
-                        <p class="stat-value" id="stat-running-vms">-</p>
-                        <p class="stat-label">Actives</p>
-                    </div>
-                    <div class="stat-box">
-                        <p class="stat-value" id="stat-hypervisors-online">-</p>
-                        <p class="stat-label">Hyperviseurs en ligne</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="hypervisors-section">
-                <h2>Hyperviseurs</h2>
-                <div id="hypervisors-grid" class="cards-grid">
-                </div>
-            </section>
-
-            <section id="uptime-section">
-                <h2>Disponibilité (historique)</h2>
-                <div id="uptime-chart"></div>
-            </section>
-
-            <section id="vms-section">
-                <h2>Machines virtuelles</h2>
-                <div id="vms-list">
-                </div>
-            </section>
-        </main>
     </div>
+</div>
 
     <div id="activity-modal" class="modal hidden">
     <div class="modal-content">

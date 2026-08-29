@@ -15,6 +15,8 @@ const lastCheckLabel = document.getElementById("last-check-label");
 const activityModal = document.getElementById("activity-modal");
 const closeActivityModal = document.getElementById("close-activity-modal");
 const activityList = document.getElementById("activity-list");
+const themeToggle = document.getElementById("theme-toggle");
+const themeIcon = document.getElementById("theme-icon");
 
 loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -257,3 +259,17 @@ setInterval(() => {
         loadDashboard();
     }
 }, 15000);
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    themeIcon.className = theme === "light" ? "ti ti-sun" : "ti ti-moon";
+    localStorage.setItem("theme", theme);
+}
+
+const savedTheme = localStorage.getItem("theme") || "dark";
+applyTheme(savedTheme);
+
+themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    applyTheme(current === "light" ? "dark" : "light");
+});
