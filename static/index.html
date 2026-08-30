@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hybrid Hypervisor Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.46.0/tabler-icons.min.css">
 </head>
 <body>
 
@@ -31,6 +31,9 @@
             </button>
             <button id="activity-log-button" class="sidebar-item">
                 <i class="ti ti-list-details"></i> Journal
+            </button>
+            <button id="create-vm-button" class="sidebar-item">
+                <i class="ti ti-plus"></i> Créer une VM
             </button>
             <div class="sidebar-spacer"></div>
             <span id="last-check-label" class="sidebar-meta"></span>
@@ -94,6 +97,77 @@
             <button id="close-activity-modal">&times;</button>
         </div>
         <div id="activity-list"></div>
+    </div>
+</div>
+
+    <div id="create-vm-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Créer une VM</h2>
+            <button id="close-create-vm-modal">&times;</button>
+        </div>
+        <form id="create-vm-form">
+            <div class="form-group">
+                <label for="vm-hypervisor">Hyperviseur</label>
+                <select id="vm-hypervisor" required>
+                    <option value="">-- Choisir --</option>
+                    <option value="kvm">KVM</option>
+                    <option value="openstack">OpenStack</option>
+                    <option value="esxi">ESXi</option>
+                    <option value="hyperv">Hyper-V</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vm-name">Nom de la VM</label>
+                <input type="text" id="vm-name" placeholder="ex: web-test-01" required>
+            </div>
+
+            <div id="unsupported-message" class="hidden form-notice">
+                La création de VM n'est pas encore disponible pour cet hyperviseur.
+            </div>
+
+            <div id="kvm-fields" class="hidden">
+                <div class="form-group">
+                    <label for="kvm-ram">RAM (Mo)</label>
+                    <input type="number" id="kvm-ram" value="512" min="128" step="128">
+                </div>
+                <div class="form-group">
+                    <label for="kvm-vcpus">vCPUs</label>
+                    <input type="number" id="kvm-vcpus" value="1" min="1" max="8">
+                </div>
+            </div>
+
+            <div id="openstack-fields" class="hidden">
+                <div class="form-group">
+                    <label for="os-image">Image</label>
+                    <select id="os-image">
+                        <option value="cirros-0.6.2-x86_64-disk">cirros-0.6.2-x86_64-disk</option>
+                        <option value="cirros-0.6.3-x86_64-disk">cirros-0.6.3-x86_64-disk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="os-flavor">Flavor</label>
+                    <select id="os-flavor">
+                        <option value="m1.tiny">m1.tiny</option>
+                        <option value="m1.small">m1.small</option>
+                        <option value="m1.medium">m1.medium</option>
+                        <option value="m1.large">m1.large</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="os-network">Réseau</label>
+                    <select id="os-network">
+                        <option value="private">private</option>
+                        <option value="public">public</option>
+                    </select>
+                </div>
+            </div>
+
+            <p id="create-vm-error" class="error-message"></p>
+
+            <button type="submit" id="create-vm-submit">Créer</button>
+        </form>
     </div>
 </div>
 

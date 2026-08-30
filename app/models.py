@@ -37,3 +37,9 @@ class ActivityEntry(BaseModel):
     action: str
     success: bool
     performed_at: str
+    
+class VMCreateRequest(BaseModel):
+    name: str
+    image: str | None = None
+    flavor: str | None = None
+    network: str | None = None

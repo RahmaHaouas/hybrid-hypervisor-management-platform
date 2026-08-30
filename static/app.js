@@ -254,6 +254,114 @@ closeActivityModal.addEventListener("click", () => {
     activityModal.classList.add("hidden");
 });
 
+const createVmButton = document.getElementById("create-vm-button");
+const createVmModal = document.getElementById("create-vm-modal");
+const closeCreateVmModal = document.getElementById("close-create-vm-modal");
+const createVmForm = document.getElementById("create-vm-form");
+const createVmError = document.getElementById("create-vm-error");
+const createVmSubmit = document.getElementById("create-vm-submit");
+const vmHypervisorSelect = document.getElementById("vm-hypervisor");
+const kvmFields = document.getElementById("kvm-fields");
+const openstackFields = document.getElementById("openstack-fields");
+const unsupportedMessage = document.getElementById("unsupported-message");
+
+const SUPPORTED_CREATE_HYPERVISORS = ["kvm", "openstack"];
+
+createVmButton.addEventListener("click", () => {
+    createVmForm.reset();
+    createVmError.textContent = "";
+    kvmFields.classList.add("hidden");
+    openstackFields.classList.add("hidden");
+    unsupportedMessage.classList.add("hidden");
+    createVmModal.classList.remove("hidden");
+});
+
+closeCreateVmModal.addEventListener("click", () => {
+    createVmModal.classList.add("hidden");
+});
+
+vmHypervisorSelect.addEventListener("change", () => {
+    const selected = vmHypervisorSelect.value;
+
+    kvmFields.classList.add("hidden");
+    openstackFields.classList.add("hidden");
+    unsupportedMessage.classList.add("hidden");
+
+    if (selected === "kvm") {
+        kvmFields.classList.remove("hidden");
+    } else if (selected === "openstack") {
+        openstackFields.classList.remove("hidden");
+    } else if (selected === "esxi" || selected === "hyperv") {
+        unsupportedMessage.classList.remove("hidden");
+    }
+});
+
+createVmForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    createVmError.textContent = "";
+
+    const hypervisor = vmHypervisorSelect.value;
+    const name = document.getElementById("vm-name").value.trim();
+
+    if (!SUPPORTED_CREATE_HYPERVISORS.includes(hypervisor)) {
+        createVmError.textContent = "La création n'est pas disponible pour cet hyperviseur.";
+        return;
+    }
+
+    const payload = { name };
+
+    if (hypervisor === "kvm") {
+        const ram = document.getElementById("kvm-ram").value;
+        const vcpus = document.getElementById("kvm-vcpus").value;
+        if (ram) payload.ram_mb = parseInt(ram, 10);
+        if (vcpus) payload.vcpus = parseInt(vcpus, 10);
+    } else if (hypervisor === "openstack") {
+        payload.image = document.getElementById("os-image").value;
+        payload.flavor = document.getElementById("os-flavor").value;
+        payload.network = document.getElementById("os-network").value;
+    }
+
+    createVmSubmit.disabled = true;
+    createVmSubmit.textContent = "Création...";
+
+    try {
+        const response = await fetch(`${API_BASE}/vms/${hypervisor}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            createVmError.textContent = errorData.detail || "Échec de la création de la VM.";
+            return;
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            createVmError.textContent = "La création a échoué côté hyperviseur. Vérifiez les paramètres.";
+            return;
+        }
+
+        createVmModal.classList.add("hidden");
+        await loadDashboard();
+    } catch (error) {
+        createVmError.textContent = "Impossible de contacter le serveur.";
+    } finally {
+        createVmSubmit.disabled = false;
+        createVmSubmit.textContent = "Créer";
+    }
+});
+
 setInterval(() => {
     if (authToken) {
         loadDashboard();

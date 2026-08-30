@@ -1,14 +1,21 @@
+import re
 import time
 
 import paramiko
 
+import logging
+
 from app.connectors.base import HypervisorConnector, VMInfo, VMState
+
+logger = logging.getLogger(__name__)
 
 _STATE_MAP = {
     "running": VMState.RUNNING,
     "shut off": VMState.STOPPED,
     "paused": VMState.SUSPENDED,
 }
+
+_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 
 
 class KVMConnector(HypervisorConnector):
@@ -83,6 +90,42 @@ class KVMConnector(HypervisorConnector):
         except RuntimeError:
             return False
 
+    def create_vm(
+        self,
+        name: str,
+        template_image: str = "/var/lib/libvirt/images/cirros.qcow2",
+        ram_mb: int = 512,
+        vcpus: int = 1,
+    ) -> bool:
+        if not _NAME_PATTERN.match(name):
+            raise ValueError(
+                "Nom de VM invalide : lettres, chiffres, tirets et underscores uniquement"
+            )
+
+        disk_path = f"/var/lib/libvirt/images/{name}.qcow2"
+        commands = [
+            f"cp {template_image} {disk_path}",
+            f"virt-install --connect qemu:///system --name {name} "
+            f"--memory {ram_mb} --vcpus {vcpus} --disk path={disk_path} "
+            f"--network network=default "
+            f"--import --os-variant generic --noautoconsole",
+        ]
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            client.connect(self.host, username=self.user, password=self.password, timeout=10)
+            for command in commands:
+                _, stdout, stderr = client.exec_command(command)
+                exit_status = stdout.channel.recv_exit_status()
+                if exit_status != 0:
+                    err = stderr.read().decode(errors="ignore")
+                    raise RuntimeError(f"Commande échouée ({exit_status}): {err.strip()}")
+            return True
+        except Exception:
+            logger.exception("Échec de la création de VM KVM '%s'", name)
+            return False
+        finally:
+            client.close()
 
     def _get_vm_state(self, vm_id: str) -> VMState:
         raw = self._run_ssh("list --all")

@@ -19,8 +19,9 @@ from app.connectors.hyperv import HyperVConnector
 from app.connectors.kvm import KVMConnector
 from app.connectors.openstack import OpenStackConnector
 from app.database import get_activity_log, get_uptime_history, init_db, record_activity
-from app.models import ActionResult, ActivityEntry, HypervisorHealth, UptimePoint, VMResponse
+from app.models import ActionResult, ActivityEntry, HypervisorHealth, UptimePoint, VMCreateRequest, VMResponse
 from app.scheduler import run_health_check_loop
+
 
 ADMIN_USERNAME = os.environ["ADMIN_USERNAME"]
 ADMIN_PASSWORD_HASH = os.environ["ADMIN_PASSWORD_HASH"]
@@ -151,6 +152,28 @@ def list_vms_for_hypervisor(hypervisor: str, current_user: str = Depends(get_cur
         return connector.list_vms()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc))
+
+@app.post("/vms/{hypervisor}", response_model=ActionResult)
+def create_vm(hypervisor: str, request: VMCreateRequest, current_user: str = Depends(get_current_username)):
+    connector = _get_connector(hypervisor)
+
+    kwargs = {}
+    if request.image:
+        kwargs["image"] = request.image
+    if request.flavor:
+        kwargs["flavor"] = request.flavor
+    if request.network:
+        kwargs["network"] = request.network
+
+    try:
+        success = connector.create_vm(request.name, **kwargs)
+    except NotImplementedError as exc:
+        raise HTTPException(status_code=501, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    record_activity(username=current_user, hypervisor=hypervisor, vm_id=request.name, action="create", success=success)
+    return ActionResult(success=success, hypervisor=hypervisor, vm_id=request.name, action="create")
 
 
 @app.post("/vms/{hypervisor}/{vm_id}/start", response_model=ActionResult)

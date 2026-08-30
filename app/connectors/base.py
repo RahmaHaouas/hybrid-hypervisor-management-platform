@@ -33,6 +33,9 @@ class HypervisorConnector(ABC):
     @abstractmethod
     def stop_vm(self, vm_id: str) -> bool:
         raise NotImplementedError
+    
+    def create_vm(self, name: str, **kwargs) -> bool:
+        raise NotImplementedError(f"create_vm non implémenté pour {self.__class__.__name__}")
 
     @abstractmethod
     def health_check(self) -> bool:
