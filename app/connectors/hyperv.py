@@ -1,6 +1,11 @@
+import logging
+import re
+
 import winrm
 
 from app.connectors.base import HypervisorConnector, VMInfo, VMState
+
+logger = logging.getLogger(__name__)
 
 _STATE_MAP = {
     "Running": VMState.RUNNING,
@@ -9,13 +14,22 @@ _STATE_MAP = {
     "Paused": VMState.SUSPENDED,
 }
 
+_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+
+_TEMPLATE_VHDX = r"C:\Users\Public\Documents\Hyper-V\Virtual hard disks\test-vm-hyperv.vhdx"
+_VHD_DIR = r"C:\Users\Public\Documents\Hyper-V\Virtual hard disks"
+_SWITCH_NAME = "vSwitch-External"
+
 
 class HyperVConnector(HypervisorConnector):
     def __init__(self, host: str, user: str, password: str):
-        self.session = winrm.Session(host, auth=(user, password), transport="ntlm")
+        self.host = host
+        self.user = user
+        self.password = password
 
     def _run_ps(self, script: str) -> str:
-        result = self.session.run_ps(script)
+        session = winrm.Session(self.host, auth=(self.user, self.password), transport="ntlm")
+        result = session.run_ps(script)
         if result.status_code != 0:
             raise RuntimeError(result.std_err.decode(errors="ignore"))
         return result.std_out.decode(errors="ignore")
@@ -64,4 +78,32 @@ class HyperVConnector(HypervisorConnector):
             self._run_ps(f"Stop-VM -Id '{vm_id}' -Force")
             return True
         except RuntimeError:
+            return False
+
+    def create_vm(
+        self,
+        name: str,
+        ram_mb: int = 512,
+        vcpus: int = 1,
+    ) -> bool:
+        if not _NAME_PATTERN.match(name):
+            raise ValueError(
+                "Nom de VM invalide : lettres, chiffres, tirets et underscores uniquement"
+            )
+
+        new_vhd_path = f"{_VHD_DIR}\\{name}.vhdx"
+        ram_bytes = ram_mb * 1_048_576
+
+        script = (
+            f"Copy-Item -Path '{_TEMPLATE_VHDX}' -Destination '{new_vhd_path}' -ErrorAction Stop; "
+            f"New-VM -Name '{name}' -MemoryStartupBytes {ram_bytes} -VHDPath '{new_vhd_path}' -Generation 1 -SwitchName '{_SWITCH_NAME}' -ErrorAction Stop; "
+            f"Set-VMProcessor -VMName '{name}' -Count {vcpus} -ErrorAction Stop; "
+            f"Start-VM -Name '{name}' -ErrorAction Stop"
+        )
+
+        try:
+            self._run_ps(script)
+            return True
+        except RuntimeError:
+            logger.exception("Échec de la création de VM Hyper-V '%s'", name)
             return False
