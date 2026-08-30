@@ -1,3 +1,6 @@
+import logging
+import re
+
 import ssl
 
 from pyVim.connect import SmartConnect, Disconnect
@@ -10,6 +13,10 @@ _STATE_MAP = {
     vim.VirtualMachinePowerState.poweredOff: VMState.STOPPED,
     vim.VirtualMachinePowerState.suspended: VMState.SUSPENDED,
 }
+
+logger = logging.getLogger(__name__)
+
+_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 
 
 class ESXiConnector(HypervisorConnector):
@@ -100,5 +107,53 @@ class ESXiConnector(HypervisorConnector):
             return True
         except vim.fault.RestrictedVersion:
                 return False
+        finally:
+            Disconnect(si)
+            
+    def create_vm(
+        self,
+        name: str,
+        ram_mb: int = 512,
+        vcpus: int = 1,
+        datastore: str = "datastore1",
+    ) -> bool:
+        if not _NAME_PATTERN.match(name):
+            raise ValueError(
+                "Nom de VM invalide : lettres, chiffres, tirets et underscores uniquement"
+            )
+
+        si = self._connect()
+        try:
+            content = si.RetrieveContent()
+            datacenter = content.rootFolder.childEntity[0]
+            vm_folder = datacenter.vmFolder
+            resource_pool = datacenter.hostFolder.childEntity[0].resourcePool
+
+            vmx_file = vim.vm.FileInfo(
+                logDirectory=None,
+                snapshotDirectory=None,
+                suspendDirectory=None,
+                vmPathName=f"[{datastore}]",
+            )
+
+            config = vim.vm.ConfigSpec(
+                name=name,
+                memoryMB=ram_mb,
+                numCPUs=vcpus,
+                files=vmx_file,
+                guestId="otherGuest64",
+                version="vmx-19",
+            )
+
+            task = vm_folder.CreateVM_Task(config=config, pool=resource_pool)
+            return True
+        except vim.fault.RestrictedVersion:
+            logger.warning("Création de VM ESXi bloquée par restriction de licence")
+            raise NotImplementedError(
+                "Création de VM non disponible sur cet hôte ESXi : licence gratuite/standalone restreinte (vCenter requis)."
+        )
+        except Exception:
+            logger.exception("Échec de la création de VM ESXi '%s'", name)
+            return False
         finally:
             Disconnect(si)

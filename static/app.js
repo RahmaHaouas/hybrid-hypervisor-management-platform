@@ -334,6 +334,7 @@ vmHypervisorSelect.addEventListener("change", () => {
     } else if (selected === "hyperv") {
         hypervFields.classList.remove("hidden");
     } else if (selected === "esxi") {
+        unsupportedMessage.textContent = "Non disponible sur ESXi Free/standalone : licence restreinte (vCenter requis).";
         unsupportedMessage.classList.remove("hidden");
     }
 });
