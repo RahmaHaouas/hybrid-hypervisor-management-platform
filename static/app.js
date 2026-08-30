@@ -254,6 +254,44 @@ closeActivityModal.addEventListener("click", () => {
     activityModal.classList.add("hidden");
 });
 
+const exportCsvButton = document.getElementById("export-csv-button");
+
+exportCsvButton.addEventListener("click", async () => {
+    exportCsvButton.disabled = true;
+    const originalText = exportCsvButton.innerHTML;
+    exportCsvButton.innerHTML = "Export en cours...";
+
+    try {
+        const response = await fetch(`${API_BASE}/activity-log/export`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Échec de l'export");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "journal_activite.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        alert("Impossible d'exporter le journal d'activité.");
+    } finally {
+        exportCsvButton.disabled = false;
+        exportCsvButton.innerHTML = originalText;
+    }
+});
+
 const createVmButton = document.getElementById("create-vm-button");
 const createVmModal = document.getElementById("create-vm-modal");
 const closeCreateVmModal = document.getElementById("close-create-vm-modal");
@@ -262,10 +300,11 @@ const createVmError = document.getElementById("create-vm-error");
 const createVmSubmit = document.getElementById("create-vm-submit");
 const vmHypervisorSelect = document.getElementById("vm-hypervisor");
 const kvmFields = document.getElementById("kvm-fields");
+const hypervFields = document.getElementById("hyperv-fields");
 const openstackFields = document.getElementById("openstack-fields");
 const unsupportedMessage = document.getElementById("unsupported-message");
 
-const SUPPORTED_CREATE_HYPERVISORS = ["kvm", "openstack"];
+const SUPPORTED_CREATE_HYPERVISORS = ["kvm", "openstack", "hyperv"];
 
 createVmButton.addEventListener("click", () => {
     createVmForm.reset();
@@ -285,13 +324,16 @@ vmHypervisorSelect.addEventListener("change", () => {
 
     kvmFields.classList.add("hidden");
     openstackFields.classList.add("hidden");
+    hypervFields.classList.add("hidden");
     unsupportedMessage.classList.add("hidden");
 
     if (selected === "kvm") {
         kvmFields.classList.remove("hidden");
     } else if (selected === "openstack") {
         openstackFields.classList.remove("hidden");
-    } else if (selected === "esxi" || selected === "hyperv") {
+    } else if (selected === "hyperv") {
+        hypervFields.classList.remove("hidden");
+    } else if (selected === "esxi") {
         unsupportedMessage.classList.remove("hidden");
     }
 });
@@ -310,9 +352,11 @@ createVmForm.addEventListener("submit", async (event) => {
 
     const payload = { name };
 
-    if (hypervisor === "kvm") {
-        const ram = document.getElementById("kvm-ram").value;
-        const vcpus = document.getElementById("kvm-vcpus").value;
+    if (hypervisor === "kvm" || hypervisor === "hyperv") {
+        const ramFieldId = hypervisor === "kvm" ? "kvm-ram" : "hyperv-ram";
+        const vcpusFieldId = hypervisor === "kvm" ? "kvm-vcpus" : "hyperv-vcpus";
+        const ram = document.getElementById(ramFieldId).value;
+        const vcpus = document.getElementById(vcpusFieldId).value;
         if (ram) payload.ram_mb = parseInt(ram, 10);
         if (vcpus) payload.vcpus = parseInt(vcpus, 10);
     } else if (hypervisor === "openstack") {

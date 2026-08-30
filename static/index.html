@@ -96,8 +96,12 @@
             <h2>Journal d'activité</h2>
             <button id="close-activity-modal">&times;</button>
         </div>
+        <button id="export-csv-button" class="export-button">
+            <i class="ti ti-download"></i> Exporter en CSV
+        </button>
         <div id="activity-list"></div>
     </div>
+</div>
 </div>
 
     <div id="create-vm-modal" class="modal hidden">
@@ -135,6 +139,17 @@
                 <div class="form-group">
                     <label for="kvm-vcpus">vCPUs</label>
                     <input type="number" id="kvm-vcpus" value="1" min="1" max="8">
+                </div>
+            </div>
+
+            <div id="hyperv-fields" class="hidden">
+                <div class="form-group">
+                    <label for="hyperv-ram">RAM (Mo)</label>
+                    <input type="number" id="hyperv-ram" value="512" min="128" step="128">
+                </div>
+                <div class="form-group">
+                    <label for="hyperv-vcpus">vCPUs</label>
+                    <input type="number" id="hyperv-vcpus" value="1" min="1" max="8">
                 </div>
             </div>
 

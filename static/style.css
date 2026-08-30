@@ -561,3 +561,23 @@ section h2 {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+
+.export-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-page);
+    border: 0.5px solid var(--border-color);
+    color: var(--text-main);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+
+.export-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}

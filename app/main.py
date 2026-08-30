@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 
 from dotenv import load_dotenv
@@ -10,7 +12,7 @@ import contextlib
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from app.auth import create_access_token, decode_access_token, verify_password
 from app.connectors.base import HypervisorConnector
@@ -200,3 +202,29 @@ def get_uptime(current_user: str = Depends(get_current_username)):
 @app.get("/activity-log", response_model=list[ActivityEntry])
 def get_activity(current_user: str = Depends(get_current_username)):
     return get_activity_log()
+
+
+@app.get("/activity-log/export")
+def export_activity_csv(current_user: str = Depends(get_current_username)):
+    entries = get_activity_log()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Date", "Utilisateur", "Hyperviseur", "VM", "Action", "Succès"])
+
+    for entry in entries:
+        writer.writerow([
+            entry["performed_at"],
+            entry["username"],
+            entry["hypervisor"],
+            entry["vm_id"],
+            entry["action"],
+            "Oui" if entry["success"] else "Non",
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=journal_activite.csv"},
+    )
