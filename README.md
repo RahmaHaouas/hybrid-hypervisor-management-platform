@@ -95,8 +95,8 @@ Documentation API interactive : `http://127.0.0.1:8000/docs`
 
 **Non couvert pour l'instant, prévu en Phase 7** :
 - Suppression de VM (`delete_vm`)
-- Modification de VM existante — redimensionnement RAM/vCPUs (`resize_vm`)
-- Gestion des rôles utilisateurs (RBAC) — actuellement un seul compte administrateur
+- Modification de VM existante, redimensionnement RAM/vCPUs (`resize_vm`)
+- Gestion des rôles utilisateurs (RBAC), actuellement un seul compte administrateur
 - Panneau de paramètres (intervalle du scheduler configurable depuis l'interface)
 - Monitoring détaillé (CPU/RAM/disque en temps réel par VM) — envisagé en phase ultérieure
 
